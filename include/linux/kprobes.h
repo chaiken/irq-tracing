@@ -94,6 +94,9 @@ struct kprobe {
 	/* Called after addr is executed, unless... */
 	kprobe_post_handler_t post_handler;
 
+	/* number of times the kprobe is hit */
+	unsigned int call_count;
+
 	/*
 	 * ... called if executing addr causes a fault (eg. page fault).
 	 * Return 1 if it handled fault, otherwise kernel will see it.
