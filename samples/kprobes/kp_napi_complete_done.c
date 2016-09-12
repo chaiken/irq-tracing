@@ -1,7 +1,7 @@
 /*
- * kp_ksoft.c
+ * kp_napi_complete_done.c
  * Based on kernel's kprobe_example.c, but modified for ARM32 and
- * PREEMPT_RT_FULL NAPI tracing.  Inspired by suggestion from bigeasy.
+ * PREEMPT_RT_FULL NAPI tracing.
  *
  * Alison Chaiken, alison@she-devel.com
  */
@@ -25,7 +25,7 @@ MODULE_LICENSE("GPL");
 
 /* For each probe you need to allocate a kprobe structure */
 static struct kprobe kp = {
-	.symbol_name	= "__raise_softirq_irqoff_ksoft",
+	.symbol_name	= "napi_complete_done",
 };
 
 /* kprobe pre_handler: called just before the probed instruction is executed */
