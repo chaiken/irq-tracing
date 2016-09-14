@@ -54,9 +54,10 @@ static void handler_post(struct kprobe *p, struct pt_regs *regs,
 
 #ifdef CONFIG_ARM
 	if (p->call_count == 1)
-		pr_info("post_handler: p->addr = 0x%p, lr = 0x%lx, interrupts enabled: %s, IRQ_MODE %s\n",
-			p->addr, regs->ARM_lr, interrupts_enabled(regs) ?
-			"yes" : "no", (proc_mode == IRQ_MODE) ? "ON" : "OFF");
+		pr_info("%s post_handler: p->addr = 0x%p, lr = 0x%lx, interrupts enabled: %s, IRQ_MODE %s\n",
+			p->symbol_name, p->addr, regs->ARM_lr,
+			interrupts_enabled(regs) ? "yes" : "no",
+			(proc_mode == IRQ_MODE) ? "ON" : "OFF");
 #endif
 }
 
@@ -92,7 +93,7 @@ static int __init kprobe_init(void)
 
 static void __exit kprobe_exit(void)
 {
-	pr_info("__raise_softirq_irqoff_ksoft: %u hits", kp.call_count);
+	pr_info("%s: %u hits", kp.symbol_name, kp.call_count);
 	unregister_kprobe(&kp);
 	pr_info("kprobe at %p unregistered\n", kp.addr);
 }

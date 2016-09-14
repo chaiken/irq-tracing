@@ -1,5 +1,5 @@
 /*
- * kp_napi_complete.c
+ * kp_napi_complete_done.c
  * Based on kernel's kprobe_example.c, but modified for ARM32 and
  * PREEMPT_RT_FULL NAPI tracing.
  *
@@ -20,7 +20,7 @@ module_param(eth_irq_procid, int, 0);
 module_param(can_irq_procid, int, 0);
 MODULE_PARM_DESC(eth_irq_procid, "Set to the number of the core where eth IRQ runs.");
 MODULE_PARM_DESC(can_irq_procid, "Set to the number of the core where CAN IRQ runs.");
-MODULE_DESCRIPTION("Print count of NAPI complete events in PREEMPT_RT_FULL");
+MODULE_DESCRIPTION("Print count of NAPI packet handling events in PREEMPT_RT_FULL");
 MODULE_LICENSE("GPL");
 
 /* For each probe you need to allocate a kprobe structure */
@@ -54,9 +54,10 @@ static void handler_post(struct kprobe *p, struct pt_regs *regs,
 
 #ifdef CONFIG_ARM
 	if (p->call_count == 1)
-		pr_info("post_handler: p->addr = 0x%p, lr = 0x%lx, interrupts enabled: %s, IRQ_MODE %s\n",
-			p->addr, regs->ARM_lr, interrupts_enabled(regs) ?
-			"yes" : "no", (proc_mode == IRQ_MODE) ? "ON" : "OFF");
+		pr_info("%s post_handler: p->addr = 0x%p, lr = 0x%lx, interrupts enabled: %s, IRQ_MODE %s\n",
+			p->symbol_name, p->addr, regs->ARM_lr,
+			interrupts_enabled(regs) ? "yes" : "no",
+			(proc_mode == IRQ_MODE) ? "ON" : "OFF");
 #endif
 }
 
@@ -92,7 +93,7 @@ static int __init kprobe_init(void)
 
 static void __exit kprobe_exit(void)
 {
-	pr_info("napi_complete_done: %u hits", kp.call_count);
+	pr_info("%s: %u hits", kp.symbol_name, kp.call_count);
 	unregister_kprobe(&kp);
 	pr_info("kprobe at %p unregistered\n", kp.addr);
 }
