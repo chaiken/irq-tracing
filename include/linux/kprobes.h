@@ -96,6 +96,8 @@ struct kprobe {
 
 	/* number of times the kprobe is hit */
 	unsigned int call_count;
+	unsigned int ksoftirqd_count;
+	unsigned int local_bh_enable_count;
 
 	/*
 	 * ... called if executing addr causes a fault (eg. page fault).
