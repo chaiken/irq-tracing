@@ -25,7 +25,7 @@ MODULE_LICENSE("GPL");
 
 /* For each probe you need to allocate a kprobe structure */
 static struct kprobe kp = {
-	.symbol_name	= "__raise_softirq_irqoff_ksoft",
+	.symbol_name	= "__raise_softirq_irqoff",
 };
 
 /* kprobe pre_handler: called just before the probed instruction is executed */
