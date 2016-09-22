@@ -14,13 +14,9 @@
 #include <linux/interrupt.h>
 
 static unsigned long proc_mode;
-unsigned int id;
-static int eth_irq_procid = 9;
-static int can_irq_procid = 10;
-module_param(eth_irq_procid, int, 0);
-module_param(can_irq_procid, int, 0);
-MODULE_PARM_DESC(eth_irq_procid, "Set to the number of the core where eth IRQ runs.");
-MODULE_PARM_DESC(can_irq_procid, "Set to the number of the core where CAN IRQ runs.");
+static int chatty = 0;
+module_param(chatty, int, 0);
+MODULE_PARM_DESC(chatty, "Verbose output into dmesg iff 1.");
 MODULE_DESCRIPTION("Determine which function invokes do_current_softirqs.");
 MODULE_LICENSE("GPL");
 
@@ -36,26 +32,23 @@ static int handler_pre(struct kprobe *p, struct pt_regs *regs)
 	struct thread_info *ti;
 	struct task_struct *task;
 
-	id = smp_processor_id();
+/*	id = smp_processor_id(); */
 
 	raised = __ffs(current->softirqs_raised);
 
 	/* change id to that where the eth IRQ is pinned */
-	if ((raised == NET_RX_SOFTIRQ) && (id == eth_irq_procid)) {
+	if (raised == NET_RX_SOFTIRQ) {
 	  	ti = current_thread_info();
 		task = ti->task;
-		pr_debug("task->comm is %s\n", task->comm);
+		if (chatty)
+			pr_debug("task->comm is %s\n", task->comm);
 
 		if (strstr(task->comm, "ksoftirq"))
 			p->ksoftirqd_count++;
 		if (strstr(task->comm, "irq/"))
 			p->local_bh_enable_count++;
 	}
-#ifdef CONFIG_CAN
-	/* change id to that where the CAN IRQ is pinned */
-	if ((raised == NET_RX_SOFTIRQ) && (id == can_irq_procid))
-		WARN_ONCE(1, "CAN NAPI.\n");
-#endif
+
 	return 0;
 }
 
