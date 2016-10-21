@@ -43,11 +43,9 @@ static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
 	struct irqprobe_data *data;
 	struct irq_desc *desc;
-	char *str;
 
 	data = (struct irqprobe_data *)ri->data;
 	data->entry_stamp = ktime_get();
-	str = data->irqname;
 	/*
 	 * PT_REGS_PARM1() is defined in samples/bpf/bpf_helpers.h, but
 	 * only for x86_64, s390x and aarch64.
@@ -63,15 +61,9 @@ static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 	pr_err("Unsupported architecture");
 	return -ENOEXEC;
 #endif
-	str[0] = 0;
 	if (desc->action)
-		sprint_symbol_no_offset(str,
-					(unsigned long)desc->action->handler);
-	/*
-	 * Instead, skip str altogether and just use
-	 * strncpy(data->irqname, desc->action->name, MAX_NAME);
-	 * ?
-	 */
+		strncpy(data->irqname, desc->action->name, NAME_MAX);
+
 	return 0;
 }
 
