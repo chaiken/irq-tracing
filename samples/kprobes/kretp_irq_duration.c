@@ -26,9 +26,11 @@
 #endif
 
 static char func_name[NAME_MAX] = "handle_irq_event";
-module_param_string(func, func_name, NAME_MAX, S_IRUGO);
-MODULE_PARM_DESC(func, "Function to kretprobe; this module will report the"
-			" function's execution time");
+static int irq_duration = 1000;
+module_param(irq_duration, int, 0);
+MODULE_PARM_DESC(irq_duration, "Minimum duration of a reported IRQ handler in nS.");
+MODULE_DESCRIPTION("Measure duration of irq handlers using kretprobe.");
+MODULE_LICENSE("GPL");
 
 /* per-instance private data */
 struct irqprobe_data {
@@ -87,7 +89,7 @@ static int ret_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 
 	now = ktime_get();
 	delta = ktime_to_ns(ktime_sub(now, data->entry_stamp));
-	if (delta > 1000 * 1)
+	if (delta > irq_duration)
 		pr_err("IRQ: %s took %lld ns to execute\n",
 			data->irqname,
 			(long long)delta);
